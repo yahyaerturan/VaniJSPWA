@@ -343,8 +343,10 @@ const routerMiddlewares = {
                 fbq('track', eventName, event);
             }
 
-            // Custom analytics endpoint
-            if (typeof navigator.sendBeacon === 'function') {
+            // Custom analytics endpoint - only send when analytics IDs are configured
+            const GA_ID = import.meta.env.VITE_GA_ID;
+            const FB_PIXEL_ID = import.meta.env.VITE_FB_PIXEL_ID;
+            if ((GA_ID || FB_PIXEL_ID) && typeof navigator.sendBeacon === 'function') {
                 navigator.sendBeacon('/api/analytics', JSON.stringify(event));
             }
 
