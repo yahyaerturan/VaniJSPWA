@@ -571,8 +571,7 @@ const devToolsPlugin = {
             
             // Internationalization
             setLanguage: (lang) => this.vani.setLanguage(lang),
-            getTranslations: () => ({ ...this.vani.i18n }),
-            
+
             // Performance
             getMetrics: () => this.vani.getMetrics?.(),
             clearMetrics: () => this.vani.clearMetrics?.(),
@@ -587,7 +586,6 @@ const devToolsPlugin = {
         }
 
         this.vani.devtools = devTools;
-        getState
         this.pluginSystem.executeHook('devtools:ready', { devTools });
     },
 
