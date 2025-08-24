@@ -120,18 +120,8 @@ const authMiddlewares = {
     // Require authentication
     requireAuth: (context, next) => {
         if (!context.vani.isAuthenticated()) {
-            const error = MiddlewareUtils.createError(
-                'AUTH_REQUIRED',
-                'Authentication required',
-                { path: context.path }
-            );
-            
-            if (context.vani.pluginSystem) {
-                context.vani.pluginSystem.executeHook('middleware:auth:required', error);
-            }
-            
             context.redirect('/login?return=' + encodeURIComponent(context.path));
-            throw error;
+            throw new Error('Navigation cancelled');
         }
         return next();
     },
@@ -139,18 +129,8 @@ const authMiddlewares = {
     // Require guest (non-authenticated)
     requireGuest: (context, next) => {
         if (context.vani.isAuthenticated()) {
-            const error = MiddlewareUtils.createError(
-                'ALREADY_AUTHENTICATED',
-                'Already authenticated',
-                { user: context.vani.auth.user }
-            );
-            
-            if (context.vani.pluginSystem) {
-                context.vani.pluginSystem.executeHook('middleware:auth:guest-violation', error);
-            }
-            
             context.redirect('/');
-            throw error;
+            throw new Error('Navigation cancelled');
         }
         return next();
     },
