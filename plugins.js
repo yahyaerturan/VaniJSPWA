@@ -898,8 +898,24 @@ const analyticsPlugin = {
         const cfg = (window.vaniApp && window.vaniApp.config) || {};
         this.gaId = options.gaId ?? cfg.integrations?.gaId ?? import.meta.env.VITE_GA_ID;
         this.fbPixelId = options.fbPixelId ?? cfg.integrations?.fbPixelId ?? import.meta.env.VITE_FB_PIXEL_ID;
-        const baseURL = options.baseURL ?? cfg.api?.baseURL ?? import.meta.env.VITE_API_URL ?? '/api';
-        this.endpoint = options.endpoint ?? (String(baseURL).replace(/\/$/, '') + '/analytics');
+        const baseURL = options.baseURL ?? cfg.api?.baseURL ?? import.meta.env.VITE_API_URL;
+        const defaultEndpoint = (this.gaId || this.fbPixelId) && baseURL
+            ? (String(baseURL).replace(/\/$/, '') + '/analytics')
+            : undefined;
+        this.endpoint = options.endpoint ?? defaultEndpoint;
+
+        // Disable analytics entirely if no tracking configuration is provided
+        if (!this.gaId && !this.fbPixelId && !this.endpoint) {
+            console.warn('⚠️ Analytics plugin disabled: no tracking IDs configured');
+            this.options = {
+                trackPageViews: false,
+                trackEvents: false,
+                trackErrors: false,
+                trackPerformance: false,
+                ...options
+            };
+            return;
+        }
 
         this.options = {
             trackPageViews: true,
@@ -912,7 +928,7 @@ const analyticsPlugin = {
         this.setupAnalytics();
         this.setupAutoTracking();
         this.loadAnalyticsLibraries();
-        
+
         console.log('✅ Analytics plugin initialized');
     },
 
