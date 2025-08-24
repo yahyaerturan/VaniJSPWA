@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en" class="theme-auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>VaniJS App</title>
+    <meta name="description" content="A modern SPA powered by VaniJS + Vite." />
+    <meta name="robots" content="index,follow" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#111827" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="/icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+    <!-- SECURITY: Prefer setting this CSP via HTTP response headers in production -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        base-uri 'self';
+        object-src 'none';
+        frame-ancestors 'none';
+        img-src 'self' data: blob:;
+        font-src 'self' data:;
+        style-src 'self' 'unsafe-inline';
+        script-src 'self'
+          'sha256-FrQ6QrU1t99mLMJC5tWXhsO2mCM5tHP3mndRuMwGl+A='
+          https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net;
+        connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com;
+        upgrade-insecure-requests;
+      "
+    />
+
+    <!-- JSON-LD (SEO). If you edit this block, recompute the CSP hash above. -->
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "VaniJS App",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "url": "https://example.com/",
+  "inLanguage": "en",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Vayes",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://example.com/icons/icon-192x192.png"
+    }
+  }
+}
+    </script>
+
+    <!-- Minimal styles; you can move these to a CSS file later -->
+    <style>
+      :root {
+        --bg: #0b1220;
+        --fg: #e5e7eb;
+        --accent: #22c55e;
+        color-scheme: light dark;
+      }
+      html, body {
+        padding: 0;
+        margin: 0;
+        min-height: 100%;
+        background: var(--bg);
+        color: var(--fg);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      .skip-link {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+      }
+      .skip-link:focus {
+        left: 1rem;
+        top: 1rem;
+        background: #111827;
+        color: #fff;
+        padding: .5rem .75rem;
+        border-radius: .5rem;
+        outline: 2px solid #fff3;
+      }
+      #offline-indicator {
+        display: none;
+        position: fixed;
+        right: 1rem;
+        bottom: 1rem;
+        background: #111827;
+        color: #fff;
+        border: 1px solid #ffffff22;
+        border-radius: .75rem;
+        padding: .5rem .75rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,.35);
+        z-index: 9999;
+      }
+      body.offline #offline-indicator { display: block; }
+      #app { min-height: 100dvh; }
+      noscript .noscript-msg {
+        display: block;
+        padding: 1rem;
+        background: #7f1d1d;
+        color: #fff;
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <a href="#app" class="skip-link">Skip to content</a>
+
+    <!-- No-JS message -->
+    <noscript>
+      <div class="noscript-msg">This app requires JavaScript to run.</div>
+    </noscript>
+
+    <!-- Offline indicator (shown when body gets .offline via app.js) -->
+    <div id="offline-indicator" role="status" aria-live="polite">
+      You’re offline. Some features may be unavailable.
+    </div>
+
+    <!-- SPA mount -->
+    <div id="app" role="main" aria-busy="true"></div>
+
+    <!-- Single ES module entry; Vite will transform this on build -->
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
