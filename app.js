@@ -3,6 +3,10 @@ import { vani } from './vanijs.js';
 import { vaniRouter } from './router.js';
 import { vaniMiddlewares } from './middleware.js';
 import { vaniPluginSystem } from './plugins.js';
+import { setupMockApi } from './mock-api.js';
+
+// Initialize mock API for development/demo purposes
+setupMockApi();
 
 // ==================== APPLICATION CONFIGURATION ====================
 const APP_CONFIG = {
@@ -162,16 +166,22 @@ vani.defineComponent('AppLayout', ({ vani, props, t }) => {
 });
 
 // Dashboard Component
-vani.defineComponent('Dashboard', () => {
+vani.defineComponent('Dashboard', ({ vani }) => {
+    const user = vani.auth.user;
     return vani.createElement('div', { className: 'min-h-screen flex flex-col bg-gray-50' },
         vani.createElement('header', { className: 'bg-white shadow' },
-            vani.createElement('div', { className: 'max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8' },
-                vani.createElement('h1', { className: 'text-3xl font-bold text-gray-900' }, 'Dashboard')
+            vani.createElement('div', { className: 'max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center' },
+                vani.createElement('h1', { className: 'text-3xl font-bold text-gray-900' }, 'Dashboard'),
+                vani.createElement('button', {
+                    className: 'text-sm text-red-600 hover:underline',
+                    onClick: () => { vani.auth.logout(); vani.navigate('/login'); }
+                }, 'Sign Out')
             )
         ),
-        vani.createElement('main', { className: 'flex-1 p-6' },
-            vani.createElement('div', { className: 'border-4 border-dashed border-gray-200 rounded-lg h-96 flex items-center justify-center bg-white' },
-                'Your content here'
+        vani.createElement('main', { className: 'flex-1 p-6 flex items-center justify-center' },
+            vani.createElement('div', { className: 'bg-white rounded-lg shadow p-8 w-full max-w-lg text-center space-y-4' },
+                vani.createElement('h2', { className: 'text-2xl font-semibold text-gray-800' }, `Welcome, ${user?.email}`),
+                vani.createElement('p', { className: 'text-gray-600' }, 'You have successfully logged in using the mock API.')
             )
         )
     );
@@ -179,16 +189,26 @@ vani.defineComponent('Dashboard', () => {
 
 // Login Component
 vani.defineComponent('LoginForm', ({ vani }) => {
-    const [state, setState] = vani.useState({ email: '', password: '' });
+    const [state, setState] = vani.useState({ email: '', password: '', error: null, loading: false });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        vani.auth.user = { email: state.email };
-        vani.navigate('/dashboard');
+        setState({ loading: true, error: null });
+
+        const success = await vani.auth.login({ email: state.email, password: state.password });
+        if (success) {
+            const params = new URLSearchParams(window.location.search);
+            const returnUrl = params.get('return') || '/dashboard';
+            vani.navigate(returnUrl);
+        } else {
+            setState({ loading: false, error: 'Invalid credentials' });
+        }
     };
 
-    return vani.createElement('div', { className: 'min-h-screen flex items-center justify-center bg-gray-50' },
+    return vani.createElement('div', { className: 'min-h-screen flex items-center justify-center bg-gray-50 p-4' },
         vani.createElement('form', { onSubmit: handleSubmit, className: 'bg-white p-8 rounded shadow-md w-full max-w-md space-y-6' },
+            vani.createElement('h2', { className: 'text-2xl font-bold text-center text-gray-900' }, 'Sign In'),
+            state.error && vani.createElement('div', { className: 'text-red-600 text-sm text-center' }, state.error),
             vani.createElement('div', { className: 'space-y-2' },
                 vani.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 'Email'),
                 vani.createElement('input', {
@@ -211,8 +231,9 @@ vani.defineComponent('LoginForm', ({ vani }) => {
             ),
             vani.createElement('button', {
                 type: 'submit',
-                className: 'w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700'
-            }, 'Sign In'),
+                className: 'w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50',
+                disabled: state.loading
+            }, state.loading ? 'Signing In...' : 'Sign In'),
             vani.createElement('p', { className: 'text-center text-sm text-gray-600' },
                 "Don't have an account? ",
                 vani.createElement('a', { href: '#/register', className: 'text-blue-600 hover:underline' }, 'Register')
