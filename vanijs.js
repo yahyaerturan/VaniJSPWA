@@ -539,8 +539,35 @@ class VaniJS {
         if (this.pluginSystem) {
             this.pluginSystem.executeHook('app:destroy', this);
         }
-        
+
         console.log('VaniJS framework destroyed');
+    }
+
+    // Configuration helpers
+    getConfig(name, key, defaultValue = null) {
+        if (this.pluginSystem && typeof this.pluginSystem.getConfig === 'function') {
+            return this.pluginSystem.getConfig(name, key, defaultValue);
+        }
+        const configKey = `vani:${name}:${key}`;
+        try {
+            const item = localStorage.getItem(configKey);
+            return item ? JSON.parse(item) : defaultValue;
+        } catch {
+            return defaultValue;
+        }
+    }
+
+    setConfig(name, key, value) {
+        if (this.pluginSystem && typeof this.pluginSystem.setConfig === 'function') {
+            return this.pluginSystem.setConfig(name, key, value);
+        }
+        const configKey = `vani:${name}:${key}`;
+        try {
+            localStorage.setItem(configKey, JSON.stringify(value));
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     // Performance monitoring
