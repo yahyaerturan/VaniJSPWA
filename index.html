@@ -21,20 +21,19 @@
     <!-- SECURITY: Prefer setting this CSP via HTTP response headers in production -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="
-        default-src 'self';
-        base-uri 'self';
-        object-src 'none';
-        frame-ancestors 'none';
-        img-src 'self' data: blob:;
-        font-src 'self' data:;
-        style-src 'self' 'unsafe-inline';
-        script-src 'self'
-          'sha256-FrQ6QrU1t99mLMJC5tWXhsO2mCM5tHP3mndRuMwGl+A='
-          https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net;
-        connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com;
-        upgrade-insecure-requests;
-      "
+        content="
+          default-src 'self';
+          base-uri 'self';
+          object-src 'none';
+          img-src 'self' data: blob:;
+          font-src 'self' data:;
+          style-src 'self' 'unsafe-inline';
+          script-src 'self'
+            'sha256-FrQ6QrU1t99mLMJC5tWXhsO2mCM5tHP3mndRuMwGl+A='
+            https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://cdn.tailwindcss.com;
+          connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com;
+          upgrade-insecure-requests;
+        "
     />
 
     <!-- JSON-LD (SEO). If you edit this block, recompute the CSP hash above. -->
@@ -60,8 +59,11 @@
       "url": "https://example.com/icons/icon-192x192.png"
     }
   }
-}
-    </script>
+  }
+  </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Minimal styles; you can move these to a CSS file later -->
     <style>

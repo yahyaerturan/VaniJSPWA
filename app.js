@@ -162,153 +162,127 @@ vani.defineComponent('AppLayout', ({ vani, props, t }) => {
 });
 
 // Dashboard Component
-vani.defineComponent('Dashboard', ({ vani, t }) => {
-    const [state, setState] = vani.useState({
-        loading: true,
-        stats: null,
-        recentActivity: []
-    });
-
-    vani.pluginSystem?.executeHook('dashboard:init');
-
-    // Load dashboard data
-    const loadData = async () => {
-        try {
-            setState({ loading: true });
-            
-            const [stats, activity] = await Promise.all([
-                fetch('/api/dashboard/stats').then(r => r.json()),
-                fetch('/api/dashboard/activity').then(r => r.json())
-            ]);
-
-            setState({
-                loading: false,
-                stats,
-                recentActivity: activity
-            });
-
-            vani.pluginSystem?.executeHook('dashboard:data-loaded', { stats, activity });
-        } catch (error) {
-            console.error('Failed to load dashboard data:', error);
-            setState({ loading: false });
-            vani.pluginSystem?.executeHook('dashboard:load-error', { error });
-        }
-    };
-
-    // Load data on component mount
-    vani.useEffect(() => {
-        loadData();
-    }, []);
-
-    if (state.loading) {
-        return vani.createElement('div', { className: 'loading' }, t('loading'));
-    }
-
-    return vani.createElement('div', { className: 'dashboard' },
-        vani.createElement('h2', {}, t('dashboard.title')),
-        
-        vani.createElement('div', { className: 'stats-grid' },
-            state.stats && Object.entries(state.stats).map(([key, value]) =>
-                vani.createElement('div', { key, className: 'stat-card' },
-                    vani.createElement('h3', {}, t(`dashboard.${key}`)),
-                    vani.createElement('p', { className: 'stat-value' }, value)
-                )
+vani.defineComponent('Dashboard', () => {
+    return vani.createElement('div', { className: 'min-h-screen flex flex-col bg-gray-50' },
+        vani.createElement('header', { className: 'bg-white shadow' },
+            vani.createElement('div', { className: 'max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8' },
+                vani.createElement('h1', { className: 'text-3xl font-bold text-gray-900' }, 'Dashboard')
             )
         ),
-
-        vani.createElement('div', { className: 'recent-activity' },
-            vani.createElement('h3', {}, t('dashboard.recent_activity')),
-            vani.createElement('ul', {},
-                state.recentActivity.map((item, index) =>
-                    vani.createElement('li', { key: index },
-                        `${item.action} - ${new Date(item.timestamp).toLocaleString()}`
-                    )
-                )
+        vani.createElement('main', { className: 'flex-1 p-6' },
+            vani.createElement('div', { className: 'border-4 border-dashed border-gray-200 rounded-lg h-96 flex items-center justify-center bg-white' },
+                'Your content here'
             )
         )
     );
 });
 
 // Login Component
-vani.defineComponent('LoginForm', ({ vani, t }) => {
-    const [state, setState] = vani.useState({
-        email: '',
-        password: '',
-        loading: false,
-        error: null
-    });
+vani.defineComponent('LoginForm', ({ vani }) => {
+    const [state, setState] = vani.useState({ email: '', password: '' });
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        setState({ loading: true, error: null });
-
-        try {
-            const success = await vani.auth.login({
-                email: state.email,
-                password: state.password
-            });
-
-            if (success) {
-                vani.pluginSystem?.executeHook('auth:login-success');
-                vani.navigate('/dashboard');
-            } else {
-                setState({ 
-                    loading: false, 
-                    error: t('login.invalid_credentials') 
-                });
-                vani.pluginSystem?.executeHook('auth:login-failed');
-            }
-        } catch (error) {
-            setState({ 
-                loading: false, 
-                error: t('login.network_error') 
-            });
-            vani.pluginSystem?.executeHook('auth:login-error', { error });
-        }
+        vani.auth.user = { email: state.email };
+        vani.navigate('/dashboard');
     };
 
-    return vani.createElement('form', { onSubmit: handleSubmit, className: 'login-form' },
-        vani.createElement('h2', {}, t('login.title')),
-        
-        state.error && 
-            vani.createElement('div', { className: 'error-message' }, state.error),
+    return vani.createElement('div', { className: 'min-h-screen flex items-center justify-center bg-gray-50' },
+        vani.createElement('form', { onSubmit: handleSubmit, className: 'bg-white p-8 rounded shadow-md w-full max-w-md space-y-6' },
+            vani.createElement('div', { className: 'space-y-2' },
+                vani.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 'Email'),
+                vani.createElement('input', {
+                    type: 'email',
+                    value: state.email,
+                    onInput: e => setState({ email: e.target.value }),
+                    required: true,
+                    className: 'w-full border rounded px-3 py-2'
+                })
+            ),
+            vani.createElement('div', { className: 'space-y-2' },
+                vani.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 'Password'),
+                vani.createElement('input', {
+                    type: 'password',
+                    value: state.password,
+                    onInput: e => setState({ password: e.target.value }),
+                    required: true,
+                    className: 'w-full border rounded px-3 py-2'
+                })
+            ),
+            vani.createElement('button', {
+                type: 'submit',
+                className: 'w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700'
+            }, 'Sign In'),
+            vani.createElement('p', { className: 'text-center text-sm text-gray-600' },
+                "Don't have an account? ",
+                vani.createElement('a', { href: '#/register', className: 'text-blue-600 hover:underline' }, 'Register')
+            )
+        )
+    );
+});
 
-        vani.createElement('div', { className: 'form-group' },
-            vani.createElement('label', {}, t('login.email')),
-            vani.createElement('input', {
-                type: 'email',
-                value: state.email,
-                onChange: (e) => setState({ email: e.target.value }),
-                required: true
-            })
-        ),
+// Register Component
+vani.defineComponent('RegisterForm', ({ vani }) => {
+    const [state, setState] = vani.useState({ email: '', password: '', confirm: '', error: null });
 
-        vani.createElement('div', { className: 'form-group' },
-            vani.createElement('label', {}, t('login.password')),
-            vani.createElement('input', {
-                type: 'password',
-                value: state.password,
-                onChange: (e) => setState({ password: e.target.value }),
-                required: true
-            })
-        ),
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (state.password !== state.confirm) {
+            setState({ error: 'Passwords do not match' });
+            return;
+        }
+        vani.auth.user = { email: state.email };
+        vani.navigate('/dashboard');
+    };
 
-        vani.createElement('button', { 
-            type: 'submit', 
-            disabled: state.loading,
-            className: 'login-button'
-        }, state.loading ? t('login.loading') : t('login.submit'))
+    return vani.createElement('div', { className: 'min-h-screen flex items-center justify-center bg-gray-50' },
+        vani.createElement('form', { onSubmit: handleSubmit, className: 'bg-white p-8 rounded shadow-md w-full max-w-md space-y-6' },
+            state.error && vani.createElement('div', { className: 'text-red-600 text-sm' }, state.error),
+            vani.createElement('div', { className: 'space-y-2' },
+                vani.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 'Email'),
+                vani.createElement('input', {
+                    type: 'email',
+                    value: state.email,
+                    onInput: e => setState({ email: e.target.value }),
+                    required: true,
+                    className: 'w-full border rounded px-3 py-2'
+                })
+            ),
+            vani.createElement('div', { className: 'space-y-2' },
+                vani.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 'Password'),
+                vani.createElement('input', {
+                    type: 'password',
+                    value: state.password,
+                    onInput: e => setState({ password: e.target.value }),
+                    required: true,
+                    className: 'w-full border rounded px-3 py-2'
+                })
+            ),
+            vani.createElement('div', { className: 'space-y-2' },
+                vani.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 'Confirm Password'),
+                vani.createElement('input', {
+                    type: 'password',
+                    value: state.confirm,
+                    onInput: e => setState({ confirm: e.target.value }),
+                    required: true,
+                    className: 'w-full border rounded px-3 py-2'
+                })
+            ),
+            vani.createElement('button', {
+                type: 'submit',
+                className: 'w-full bg-green-600 text-white py-2 rounded hover:bg-green-700'
+            }, 'Register'),
+            vani.createElement('p', { className: 'text-center text-sm text-gray-600' },
+                'Already have an account? ',
+                vani.createElement('a', { href: '#/login', className: 'text-blue-600 hover:underline' }, 'Sign In')
+            )
+        )
     );
 });
 
 // ==================== ROUTE DEFINITIONS ====================
 
 // Public routes
-vani.defineRoute('/', 'Dashboard', {}, [
-    vaniMiddlewares.auth.requireAuth,
-    vaniMiddlewares.router.navigationLogger
-]);
-
 vani.defineRoute('/login', 'LoginForm', {}, [
     vaniMiddlewares.auth.requireGuest,
     vaniMiddlewares.router.scrollToTop
@@ -319,39 +293,15 @@ vani.defineRoute('/register', 'RegisterForm', {}, [
 ]);
 
 // Protected routes
+vani.defineRoute('/', 'Dashboard', {}, [
+    vaniMiddlewares.auth.requireAuth,
+    vaniMiddlewares.router.navigationLogger
+]);
+
 vani.defineRoute('/dashboard', 'Dashboard', {}, [
     vaniMiddlewares.auth.requireAuth,
-    vaniMiddlewares.router.navigationLogger,
-    vaniMiddlewares.data.withData(() => 
-        fetch('/api/dashboard/data').then(r => r.json()),
-        { cacheKey: 'dashboard_data', ttl: 300000 }
-    )
+    vaniMiddlewares.router.navigationLogger
 ]);
-
-vani.defineRoute('/profile', 'UserProfile', {}, [
-    vaniMiddlewares.auth.requireAuth,
-    vaniMiddlewares.router.validateParams({
-        id: { required: false, pattern: /^\d+$/ }
-    })
-]);
-
-vani.defineRoute('/settings', 'Settings', {}, [
-    vaniMiddlewares.auth.requireAuth,
-    vaniMiddlewares.permission.requirePermission('settings_access')
-]);
-
-// Admin routes
-vani.defineRoute('/admin', 'AdminDashboard', {}, [
-    vaniMiddlewares.auth.requireAuth,
-    vaniMiddlewares.auth.requireRole('admin'),
-    vaniMiddlewares.permission.requireAllPermissions('admin_access', 'user_management')
-]);
-
-// Error routes
-vani.defineRoute('/404', 'NotFoundPage');
-vani.defineRoute('/500', 'ErrorPage');
-vani.defineRoute('/unauthorized', 'UnauthorizedPage');
-vani.defineRoute('/offline', 'OfflinePage');
 
 // ==================== INTERNATIONALIZATION ====================
 
