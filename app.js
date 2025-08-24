@@ -283,22 +283,22 @@ vani.defineComponent('RegisterForm', ({ vani }) => {
 // ==================== ROUTE DEFINITIONS ====================
 
 // Public routes
-vani.defineRoute('/login', 'LoginForm', {}, [
+vaniRouter.defineRoute('/login', 'LoginForm', {}, [
     vaniMiddlewares.auth.requireGuest,
     vaniMiddlewares.router.scrollToTop
 ]);
 
-vani.defineRoute('/register', 'RegisterForm', {}, [
+vaniRouter.defineRoute('/register', 'RegisterForm', {}, [
     vaniMiddlewares.auth.requireGuest
 ]);
 
 // Protected routes
-vani.defineRoute('/', 'Dashboard', {}, [
+vaniRouter.defineRoute('/', 'Dashboard', {}, [
     vaniMiddlewares.auth.requireAuth,
     vaniMiddlewares.router.navigationLogger
 ]);
 
-vani.defineRoute('/dashboard', 'Dashboard', {}, [
+vaniRouter.defineRoute('/dashboard', 'Dashboard', {}, [
     vaniMiddlewares.auth.requireAuth,
     vaniMiddlewares.router.navigationLogger
 ]);
